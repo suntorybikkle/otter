@@ -60,7 +60,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 func handleGet(w http.ResponseWriter, r *http.Request) {
 	output, _ := json.MarshalIndent(&studyHistory, "", "\t\t")
+
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write(output)
 	return
 }
@@ -74,6 +76,9 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	var studyInfo StudyInfo
 	json.Unmarshal(body, &studyInfo)
 	fmt.Println(studyInfo)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.WriteHeader(200)
 	return
 }
