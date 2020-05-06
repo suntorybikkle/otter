@@ -3,5 +3,5 @@ INSERT INTO records(user_id, subject_id, study_time, date_time) VALUES(1, 1, 200
 INSERT INTO records(user_id, subject_id, study_time, date_time) VALUES(1, 2, 10, '2020-05-07 01:02:30');
 INSERT INTO records(user_id, subject_id, study_time, date_time) VALUES(1, 1, 700, '2020-05-12 12:03:30');
 INSERT INTO records(user_id, subject_id, study_time, date_time) VALUES(1, 3, 4300, '2020-05-12 16:12:30');
-INSERT INTO records(user_id, subject_id, study_time, date_time) VALUES(1, NULL, 300, '2020-05-12 19:12:30');
+INSERT INTO records(user_id, subject_id, study_time, date_time) VALUES(1, 2, 300, '2020-05-12 19:12:30');
 INSERT INTO records(user_id, subject_id, study_time, date_time) VALUES(1, 1, 10, '2020-05-12 23:40:00');
