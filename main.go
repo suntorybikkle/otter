@@ -2,71 +2,79 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 )
 
-type Result struct {
-	Id      int
-	Subject string
-	Time    int
+type StudyHistory struct {
+	UserId     int         `json:"userId"`
+	UserName   string      `json:"userName"`
+	StudyInfos []StudyInfo `json:"studyInfos"`
 }
 
-var Results map[string][]*Result
-
-func hello(w http.ResponseWriter, r *http.Request) {
-	_, _ = fmt.Fprintf(w, "hello")
+type StudyInfo struct {
+	Id        int `json:"studyId"`
+	UserId    int
+	StudyId   int
+	SubjectId int    `json:"subId"`
+	StudyTime int    `json:"studyTime"`
+	DateTime  string `json:"dateTime"`
 }
 
 func main() {
-	// Results = make(map[string][]*Result)
-
-	// result1 := Result{Id: 1, Subject: "Math", Time: 2}
-	// result2 := Result{Id: 2, Subject: "Science", Time: 6}
-	// Results["hoge"] = append(Results["hoge"], &result1)
-	// Results["hoge"] = append(Results["hoge"], &result2)
-
-	// for _, result := range Results["hoge"] {
-	// 	fmt.Println(result)
-	// }
-
-	// result := Results["hoge"]
-	// output, _ := json.MarshalIndent(&result, "", "\t\t")
-	// fmt.Println(output)
-
 	server := http.Server{
 		Addr: "127.0.0.1:8080",
 	}
-	http.HandleFunc("/hello", hello)
 	http.HandleFunc("/record/", handleRequest)
 	server.ListenAndServe()
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
+	var err error
 	switch r.Method {
 	case "GET":
-		handleGet(w, r)
+		err = handleGet(w, r)
 	case "POST":
-		handlePost(w, r)
+		err = handlePost(w, r)
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func handleGet(w http.ResponseWriter, r *http.Request) {
-	result := Results["hoge"]
-	output, _ := json.MarshalIndent(&result, "", "\t\t")
+func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
+	studyInfos, err := GetAllStudyInfo(1)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	studyHistory := StudyHistory{UserId: 1, UserName: "ktguy"}
+	for _, studyInfo := range studyInfos {
+		studyHistory.StudyInfos = append(studyHistory.StudyInfos, studyInfo)
+	}
+
+	output, _ := json.MarshalIndent(&studyHistory, "", "\t\t")
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write(output)
+	return
 }
 
-func handlePost(w http.ResponseWriter, r *http.Request) {
+func handlePost(w http.ResponseWriter, r *http.Request) (err error) {
+
 	len := r.ContentLength
 	body := make([]byte, len)
-
 	r.Body.Read(body)
-	var result Result
-	json.Unmarshal(body, &result)
 
-	Results["hoge"] = append(Results["hoge"], &result)
+	var studyInfo StudyInfo
+	json.Unmarshal(body, &studyInfo)
+	studyInfo.UserId = 1
+	studyInfo.Create()
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.WriteHeader(200)
+	return
 }
