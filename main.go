@@ -4,7 +4,22 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
+
+type MyTime struct {
+	*time.Time
+}
+
+func (myTime MyTime) format() string {
+	return myTime.Time.Format("2006-01-02 15:04:05")
+}
+
+func (myTime *MyTime) UnmarshalJSON(data []byte) (err error) {
+	t, err := time.Parse("\"2006-01-02 15:04:05\"", string(data))
+	*myTime = MyTime{&t}
+	return
+}
 
 type StudyHistory struct {
 	UserId     int         `json:"userId"`
@@ -16,9 +31,10 @@ type StudyInfo struct {
 	Id        int `json:"studyId"`
 	UserId    int
 	StudyId   int
-	SubjectId int    `json:"subId"`
-	StudyTime int    `json:"studyTime"`
-	DateTime  string `json:"dateTime"`
+	SubjectId int `json:"subId"`
+	StudyTime int `json:"studyTime"`
+	// DateTime  string `json:"dateTime"`
+	DateTime MyTime `json:"dateTime"`
 }
 
 func main() {
@@ -67,10 +83,12 @@ func handlePost(w http.ResponseWriter, r *http.Request) (err error) {
 	len := r.ContentLength
 	body := make([]byte, len)
 	r.Body.Read(body)
+	log.Println(string(body))
 
 	var studyInfo StudyInfo
 	json.Unmarshal(body, &studyInfo)
 	studyInfo.UserId = 1
+	log.Println(studyInfo)
 	studyInfo.Create()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
