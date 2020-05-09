@@ -7,34 +7,57 @@ import (
 	"time"
 )
 
-type MyTime struct {
-	*time.Time
-}
-
-func (myTime MyTime) format() string {
-	return myTime.Time.Format("2006-01-02 15:04:05")
-}
-
-func (myTime *MyTime) UnmarshalJSON(data []byte) (err error) {
-	t, err := time.Parse("\"2006-01-02 15:04:05\"", string(data))
-	*myTime = MyTime{&t}
-	return
-}
-
-type StudyHistory struct {
-	UserId     int         `json:"userId"`
-	UserName   string      `json:"userName"`
-	StudyInfos []StudyInfo `json:"studyInfos"`
-}
-
 type StudyInfo struct {
-	Id        int `json:"studyId"`
+	// これがエンティティ?
+	Id        int
 	UserId    int
 	StudyId   int
-	SubjectId int `json:"subId"`
-	StudyTime int `json:"studyTime"`
-	// DateTime  string `json:"dateTime"`
-	DateTime MyTime `json:"dateTime"`
+	SubjectId int
+	StudyTime int
+	DateTime  time.Time
+}
+
+type StudyReportJson struct {
+	UserId     int             `json:"userId"`
+	UserName   string          `json:"userName"`
+	StudyInfos []StudyInfoJson `json:"studyInfos"`
+}
+
+func (studyReportJson *StudyReportJson) retrieve(studyInfos []StudyInfo) {
+	for _, studyInfo := range studyInfos {
+		var studyInfoJson StudyInfoJson
+		studyInfoJson.retrieve(studyInfo)
+		studyReportJson.StudyInfos = append(studyReportJson.StudyInfos, studyInfoJson)
+	}
+}
+
+type StudyInfoJson struct {
+	Id        int    `json:"studyId"`
+	SubjectId int    `json:"subId"`
+	StudyTime int    `json:"studyTime"`
+	DateTime  string `json:"dateTime"`
+}
+
+func (studyInfoJson *StudyInfoJson) retrieve(studyInfo StudyInfo) {
+	studyInfoJson.Id = studyInfo.Id
+	studyInfoJson.SubjectId = studyInfo.SubjectId
+	studyInfoJson.StudyTime = studyInfo.StudyTime
+	studyInfoJson.DateTime = studyInfo.DateTime.Format("2006-01-02 15:04:05")
+}
+
+type StudyPostJson struct {
+	UserId    int    `json:"userId"`
+	SubjectId int    `json:"subId"`
+	StudyTime int    `json:"studyTime"`
+	DateTime  string `json:"dateTime"`
+}
+
+func (studyPostJson StudyPostJson) convert() (studyInfo StudyInfo) {
+	studyInfo.UserId = 1
+	studyInfo.SubjectId = studyPostJson.SubjectId
+	studyInfo.StudyTime = studyPostJson.StudyTime
+	studyInfo.DateTime, _ = time.Parse("2006-01-02 15:04:05", studyPostJson.DateTime)
+	return
 }
 
 func main() {
@@ -64,13 +87,10 @@ func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
 		log.Println(err)
 		return
 	}
+	studyReportJson := StudyReportJson{UserId: 1, UserName: "ktguy"}
+	studyReportJson.retrieve(studyInfos)
 
-	studyHistory := StudyHistory{UserId: 1, UserName: "ktguy"}
-	for _, studyInfo := range studyInfos {
-		studyHistory.StudyInfos = append(studyHistory.StudyInfos, studyInfo)
-	}
-
-	output, _ := json.MarshalIndent(&studyHistory, "", "\t\t")
+	output, _ := json.MarshalIndent(&studyReportJson, "", "\t\t")
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -83,12 +103,11 @@ func handlePost(w http.ResponseWriter, r *http.Request) (err error) {
 	len := r.ContentLength
 	body := make([]byte, len)
 	r.Body.Read(body)
-	log.Println(string(body))
 
-	var studyInfo StudyInfo
-	json.Unmarshal(body, &studyInfo)
-	studyInfo.UserId = 1
-	log.Println(studyInfo)
+	var studyPostJson StudyPostJson
+	json.Unmarshal(body, &studyPostJson)
+
+	studyInfo := studyPostJson.convert()
 	studyInfo.Create()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
