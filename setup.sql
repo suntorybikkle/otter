@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS records;
+DROP TABLE IF EXISTS study_infos;
 
-CREATE TABLE records (
+CREATE TABLE study_infos (
   id SERIAL PRIMARY KEY NOT NULL,
   user_id INT NOT NULL,
   subject_id INT,
