@@ -20,6 +20,7 @@ export default {
             hour:0,
             min: 0,
             sec: 0,
+            sendSec: 0,
             timerObj: null
         }
     },
@@ -28,12 +29,15 @@ export default {
             // stop処理
             if(this.status === 'START') {
                 this.complete();
+                this.post();
+                this.sendSec = 0;
             }
             // start処理
             else {
                 let self = this;
                 this.timerObj = setInterval(function() {
                     self.count();
+                    self.sendSec++;
                 }, 1000);
             }
         }
@@ -74,6 +78,44 @@ export default {
             this.min = 0;
             this.sec = 0;
             this.status = 'START';
+        },
+        post(){
+            const obj ={
+                subId : 0,
+                studyTime : 0,
+                dateTime : ""
+            }
+            // 学習時間の取得
+            obj.studyTime = this.sendSec;
+            
+            // 日時の取得
+            obj.dateTime = this.getDate()
+            console.log(obj.dateTime)
+
+            // jsonフォーマット成形
+            const body = JSON.stringify(obj);
+            
+            // post
+            fetch('http://127.0.0.1:8080/record/',
+                {
+                    mode: 'cors',
+                    method: 'POST',
+                    body
+                }).then(() =>{
+                console.log("ok");
+            });
+        },
+        // post: dateTime用整形メソッド
+        getDate() {
+            const t = new Date();
+            const year = t.getFullYear();
+            const month = t.getMonth()+1 > 9 ? (t.getMonth()+1) : "0" + (t.getMonth()+1);
+            const date = t.getDate() > 9 ? t.getDate() : "0" + t.getDate();
+            const hour = t.getHours() > 9 ? t.getHours() : "0" + t.getHours();
+            const minute = t.getMinutes() > 9 ? t.getMinutes() : "0" + t.getMinutes();
+            const second = t.getSeconds() > 9 ? t.getSeconds() : "0" + t.getSeconds();
+            const formatDate = year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second
+            return formatDate;
         }
     },
     computed: {
@@ -103,7 +145,7 @@ export default {
 }
 .timer__toggle, .timer__reset {
   cursor: pointer;
-  margin:0 1em;
+  margin: .5em;
   min-width: 3.5em;
   display: inline-block;
   padding: 0.5em 1em;

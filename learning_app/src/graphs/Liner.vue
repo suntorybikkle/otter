@@ -44,6 +44,7 @@ export default {
           const newCate = this.cate.map((now,index)=> {
                return this.cate[index];
           })
+          console.log(newData, newCate)
 
             this.graphData.x = newCate;
             this.graphData.y = newData;

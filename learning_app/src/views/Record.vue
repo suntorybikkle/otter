@@ -15,32 +15,37 @@ export default {
   data(){
     return{
       json:{},
-      cate:["5/1","5/2","5/3","5/4","5/5","5/6","5/7"],
-      data:[22,13,32,12,95,35,68]
+      cate:[],
+      data:[]
     }
   },
   methods:{
     get() {
-        let body = this;
-        fetch('http://127.0.0.1:8080/record/',{
-            mode: 'cors'
-        })
-        .then(res => res.json())
-        .then(data => {
-            body.json = data.studyInfos;
-        }).then(() => {
-          const newCate = this.cate.map((cateVal, index) => {
-            const date = this.json[index].dateTime.split(" ");
-            return date[0];
-          });
-
-          const newData = this.cate.map((dataVal, index) => {
-            return this.json[index].studyTime;
-          });
-
-          body.cate = newCate;
-          body.data = newData;
+      let body = this;
+      fetch('http://127.0.0.1:8080/record/',{
+        mode: 'cors'
+      })
+      .then(res => res.json())
+      // データをjsonに格納
+      .then(data => {
+        body.json = data.studyInfos;
+      })
+      // 
+      .then(() => {
+        const newCate = body.json.map((cateVal, index) => {
+          const date = body.json[index].dateTime.split(" ");
+          return date[0];
         });
+
+        const newData = body.json.map((dataVal, index) => {
+          return body.json[index].studyTime;
+        });
+
+        body.cate = newCate;
+        body.data = newData;
+
+        console.log(body.cate, body.data)
+      });
     },
     substituteFields(json){
       console.log(json);

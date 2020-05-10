@@ -1,15 +1,16 @@
 <template>
   <div class="home">
-    <Timer></Timer>
+    <p>This is home page.</p>
   </div>
 </template>
 
 <script>
-import Timer from '../components/Timer'
 export default {
   name: 'Home',
-  components:{
-    Timer
+  data(){
+    return {
+
+    }
   }
 }
 </script>
