@@ -23,12 +23,18 @@ type StudyReportJson struct {
 	StudyInfos []StudyInfoJson `json:"studyInfos"`
 }
 
-func (studyReportJson *StudyReportJson) retrieve(studyInfos []StudyInfo) {
+func ReportResponseAdapter(studyInfos []StudyInfo) (studyReportJson StudyReportJson) {
+	var studyInfosJson []StudyInfoJson
 	for _, studyInfo := range studyInfos {
-		var studyInfoJson StudyInfoJson
-		studyInfoJson.retrieve(studyInfo)
-		studyReportJson.StudyInfos = append(studyReportJson.StudyInfos, studyInfoJson)
+		studyInfosJson = append(studyInfosJson, StudyInfoJson{
+			Id:        studyInfo.Id,
+			SubjectId: studyInfo.SubjectId,
+			StudyTime: studyInfo.StudyTime,
+			DateTime:  studyInfo.DateTime.Format("2006-01-02 15:04:05"),
+		})
 	}
+	studyReportJson = StudyReportJson{UserId: 1, UserName: "ktguy", StudyInfos: studyInfosJson}
+	return
 }
 
 type StudyInfoJson struct {
@@ -36,13 +42,6 @@ type StudyInfoJson struct {
 	SubjectId int    `json:"subId"`
 	StudyTime int    `json:"studyTime"`
 	DateTime  string `json:"dateTime"`
-}
-
-func (studyInfoJson *StudyInfoJson) retrieve(studyInfo StudyInfo) {
-	studyInfoJson.Id = studyInfo.Id
-	studyInfoJson.SubjectId = studyInfo.SubjectId
-	studyInfoJson.StudyTime = studyInfo.StudyTime
-	studyInfoJson.DateTime = studyInfo.DateTime.Format("2006-01-02 15:04:05")
 }
 
 type StudyPostJson struct {
@@ -87,9 +86,8 @@ func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
 		log.Println(err)
 		return
 	}
-	studyReportJson := StudyReportJson{UserId: 1, UserName: "ktguy"}
-	studyReportJson.retrieve(studyInfos)
 
+	studyReportJson := ReportResponseAdapter(studyInfos)
 	output, _ := json.MarshalIndent(&studyReportJson, "", "\t\t")
 
 	w.Header().Set("Content-Type", "application/json")
