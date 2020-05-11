@@ -23,6 +23,13 @@ type StudyReportJson struct {
 	StudyInfos []StudyInfoJson `json:"studyInfos"`
 }
 
+type StudyInfoJson struct {
+	Id        int    `json:"studyId"`
+	SubjectId int    `json:"subId"`
+	StudyTime int    `json:"studyTime"`
+	DateTime  string `json:"dateTime"`
+}
+
 func ReportResponseAdapter(studyInfos []StudyInfo) (studyReportJson StudyReportJson) {
 	var studyInfosJson []StudyInfoJson
 	for _, studyInfo := range studyInfos {
@@ -37,13 +44,6 @@ func ReportResponseAdapter(studyInfos []StudyInfo) (studyReportJson StudyReportJ
 	return
 }
 
-type StudyInfoJson struct {
-	Id        int    `json:"studyId"`
-	SubjectId int    `json:"subId"`
-	StudyTime int    `json:"studyTime"`
-	DateTime  string `json:"dateTime"`
-}
-
 type StudyPostJson struct {
 	UserId    int    `json:"userId"`
 	SubjectId int    `json:"subId"`
@@ -51,11 +51,17 @@ type StudyPostJson struct {
 	DateTime  string `json:"dateTime"`
 }
 
-func (studyPostJson StudyPostJson) convert() (studyInfo StudyInfo) {
-	studyInfo.UserId = 1
-	studyInfo.SubjectId = studyPostJson.SubjectId
-	studyInfo.StudyTime = studyPostJson.StudyTime
-	studyInfo.DateTime, _ = time.Parse("2006-01-02 15:04:05", studyPostJson.DateTime)
+func StudyPostRequestAdapter(studyPostJson StudyPostJson) (studyInfo StudyInfo) {
+	studyDate, err := time.Parse("2006-01-02 15:04:05", studyPostJson.DateTime)
+	if err != nil {
+		log.Println(err)
+	}
+	studyInfo = StudyInfo{
+		UserId:    1,
+		SubjectId: studyPostJson.SubjectId,
+		StudyTime: studyPostJson.StudyTime,
+		DateTime:  studyDate,
+	}
 	return
 }
 
@@ -105,7 +111,7 @@ func handlePost(w http.ResponseWriter, r *http.Request) (err error) {
 	var studyPostJson StudyPostJson
 	json.Unmarshal(body, &studyPostJson)
 
-	studyInfo := studyPostJson.convert()
+	studyInfo := StudyPostRequestAdapter(studyPostJson)
 	studyInfo.Create()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
