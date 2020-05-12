@@ -23,14 +23,6 @@ type StudyReportJson struct {
 	StudyInfos []StudyInfoJson `json:"studyInfos"`
 }
 
-func (studyReportJson *StudyReportJson) retrieve(studyInfos []StudyInfo) {
-	for _, studyInfo := range studyInfos {
-		var studyInfoJson StudyInfoJson
-		studyInfoJson.retrieve(studyInfo)
-		studyReportJson.StudyInfos = append(studyReportJson.StudyInfos, studyInfoJson)
-	}
-}
-
 type StudyInfoJson struct {
 	Id        int    `json:"studyId"`
 	SubjectId int    `json:"subId"`
@@ -38,11 +30,18 @@ type StudyInfoJson struct {
 	DateTime  string `json:"dateTime"`
 }
 
-func (studyInfoJson *StudyInfoJson) retrieve(studyInfo StudyInfo) {
-	studyInfoJson.Id = studyInfo.Id
-	studyInfoJson.SubjectId = studyInfo.SubjectId
-	studyInfoJson.StudyTime = studyInfo.StudyTime
-	studyInfoJson.DateTime = studyInfo.DateTime.Format("2006-01-02 15:04:05")
+func ReportResponseAdapter(studyInfos []StudyInfo) (studyReportJson StudyReportJson) {
+	var studyInfosJson []StudyInfoJson
+	for _, studyInfo := range studyInfos {
+		studyInfosJson = append(studyInfosJson, StudyInfoJson{
+			Id:        studyInfo.Id,
+			SubjectId: studyInfo.SubjectId,
+			StudyTime: studyInfo.StudyTime,
+			DateTime:  studyInfo.DateTime.Format("2006-01-02 15:04:05"),
+		})
+	}
+	studyReportJson = StudyReportJson{UserId: 1, UserName: "ktguy", StudyInfos: studyInfosJson}
+	return
 }
 
 type StudyPostJson struct {
@@ -52,11 +51,17 @@ type StudyPostJson struct {
 	DateTime  string `json:"dateTime"`
 }
 
-func (studyPostJson StudyPostJson) convert() (studyInfo StudyInfo) {
-	studyInfo.UserId = 1
-	studyInfo.SubjectId = studyPostJson.SubjectId
-	studyInfo.StudyTime = studyPostJson.StudyTime
-	studyInfo.DateTime, _ = time.Parse("2006-01-02 15:04:05", studyPostJson.DateTime)
+func StudyPostRequestAdapter(studyPostJson StudyPostJson) (studyInfo StudyInfo) {
+	studyDate, err := time.Parse("2006-01-02 15:04:05", studyPostJson.DateTime)
+	if err != nil {
+		log.Println(err)
+	}
+	studyInfo = StudyInfo{
+		UserId:    1,
+		SubjectId: studyPostJson.SubjectId,
+		StudyTime: studyPostJson.StudyTime,
+		DateTime:  studyDate,
+	}
 	return
 }
 
@@ -87,9 +92,8 @@ func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
 		log.Println(err)
 		return
 	}
-	studyReportJson := StudyReportJson{UserId: 1, UserName: "ktguy"}
-	studyReportJson.retrieve(studyInfos)
 
+	studyReportJson := ReportResponseAdapter(studyInfos)
 	output, _ := json.MarshalIndent(&studyReportJson, "", "\t\t")
 
 	w.Header().Set("Content-Type", "application/json")
@@ -107,7 +111,7 @@ func handlePost(w http.ResponseWriter, r *http.Request) (err error) {
 	var studyPostJson StudyPostJson
 	json.Unmarshal(body, &studyPostJson)
 
-	studyInfo := studyPostJson.convert()
+	studyInfo := StudyPostRequestAdapter(studyPostJson)
 	studyInfo.Create()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
