@@ -4,18 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"test/domain"
+	"test/interfaces"
 	"time"
 )
-
-type StudyInfo struct {
-	// これがエンティティ?
-	Id        int
-	UserId    int
-	StudyId   int
-	SubjectId int
-	StudyTime int
-	DateTime  time.Time
-}
 
 type StudyReportJson struct {
 	UserId     int             `json:"userId"`
@@ -30,7 +22,7 @@ type StudyInfoJson struct {
 	DateTime  string `json:"dateTime"`
 }
 
-func ReportResponseAdapter(studyInfos []StudyInfo) (studyReportJson StudyReportJson) {
+func ReportResponseAdapter(studyInfos []domain.StudyInfo) (studyReportJson StudyReportJson) {
 	var studyInfosJson []StudyInfoJson
 	for _, studyInfo := range studyInfos {
 		studyInfosJson = append(studyInfosJson, StudyInfoJson{
@@ -51,12 +43,12 @@ type StudyPostJson struct {
 	DateTime  string `json:"dateTime"`
 }
 
-func StudyPostRequestAdapter(studyPostJson StudyPostJson) (studyInfo StudyInfo) {
+func StudyPostRequestAdapter(studyPostJson StudyPostJson) (studyInfo domain.StudyInfo) {
 	studyDate, err := time.Parse("2006-01-02 15:04:05", studyPostJson.DateTime)
 	if err != nil {
 		log.Println(err)
 	}
-	studyInfo = StudyInfo{
+	studyInfo = domain.StudyInfo{
 		UserId:    1,
 		SubjectId: studyPostJson.SubjectId,
 		StudyTime: studyPostJson.StudyTime,
@@ -87,7 +79,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
-	studyInfos, err := GetAllStudyInfo(1)
+	studyInfos, err := interfaces.GetAllStudyInfo(1)
 	if err != nil {
 		log.Println(err)
 		return
@@ -112,7 +104,8 @@ func handlePost(w http.ResponseWriter, r *http.Request) (err error) {
 	json.Unmarshal(body, &studyPostJson)
 
 	studyInfo := StudyPostRequestAdapter(studyPostJson)
-	studyInfo.Create()
+	// studyInfo.Create()
+	interfaces.Create(studyInfo)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
