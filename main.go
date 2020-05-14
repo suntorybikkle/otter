@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"test/domain"
+	"test/domain/model"
 	"test/interfaces"
 	"time"
 )
@@ -22,7 +22,7 @@ type StudyInfoJson struct {
 	DateTime  string `json:"dateTime"`
 }
 
-func ReportResponseAdapter(studyInfos []domain.StudyInfo) (studyReportJson StudyReportJson) {
+func ReportResponseAdapter(studyInfos []model.StudyInfo) (studyReportJson StudyReportJson) {
 	var studyInfosJson []StudyInfoJson
 	for _, studyInfo := range studyInfos {
 		studyInfosJson = append(studyInfosJson, StudyInfoJson{
@@ -43,12 +43,12 @@ type StudyPostJson struct {
 	DateTime  string `json:"dateTime"`
 }
 
-func StudyPostRequestAdapter(studyPostJson StudyPostJson) (studyInfo domain.StudyInfo) {
+func StudyPostRequestAdapter(studyPostJson StudyPostJson) (studyInfo model.StudyInfo) {
 	studyDate, err := time.Parse("2006-01-02 15:04:05", studyPostJson.DateTime)
 	if err != nil {
 		log.Println(err)
 	}
-	studyInfo = domain.StudyInfo{
+	studyInfo = model.StudyInfo{
 		UserId:    1,
 		SubjectId: studyPostJson.SubjectId,
 		StudyTime: studyPostJson.StudyTime,

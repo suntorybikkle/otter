@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	_ "github.com/lib/pq"
 	"log"
-	"test/domain"
+	"test/domain/model"
 )
 
 var Db *sql.DB
@@ -17,14 +17,14 @@ func init() {
 	}
 }
 
-func GetLastStudyInfo(id int) (studyInfo domain.StudyInfo, err error) {
-	studyInfo = domain.StudyInfo{}
+func GetLastStudyInfo(id int) (studyInfo model.StudyInfo, err error) {
+	studyInfo = model.StudyInfo{}
 	err = Db.QueryRow("SELECT id, user_id, subject_id, study_time, date_time FROM study_infos WHERE user_id = $1 ORDER BY Id DESC LIMIT 1", id).Scan(
 		&studyInfo.Id, &studyInfo.UserId, &studyInfo.SubjectId, &studyInfo.StudyTime, &studyInfo.DateTime)
 	return
 }
 
-func GetAllStudyInfo(userId int) (studyInfos []domain.StudyInfo, err error) {
+func GetAllStudyInfo(userId int) (studyInfos []model.StudyInfo, err error) {
 	rows, err := Db.Query("SELECT id, user_id, subject_id, study_time, date_time FROM study_infos WHERE user_id = $1", userId)
 	defer rows.Close()
 	if err != nil {
@@ -32,7 +32,7 @@ func GetAllStudyInfo(userId int) (studyInfos []domain.StudyInfo, err error) {
 		return
 	}
 	for rows.Next() {
-		studyInfo := domain.StudyInfo{}
+		studyInfo := model.StudyInfo{}
 		err = rows.Scan(&studyInfo.Id, &studyInfo.UserId, &studyInfo.SubjectId, &studyInfo.StudyTime, &studyInfo.DateTime)
 		if err != nil {
 			log.Println(err)
@@ -55,7 +55,7 @@ func GetAllStudyInfo(userId int) (studyInfos []domain.StudyInfo, err error) {
 // 	return
 // }
 
-func Create(studyInfo domain.StudyInfo) (err error) {
+func Create(studyInfo model.StudyInfo) (err error) {
 	statement := "INSERT INTO study_infos(user_id, subject_id, study_time, date_time) VALUES($1, $2, $3, $4) RETURNING id"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
