@@ -1,11 +1,12 @@
 package repository
 
-imoprt (
+import (
 	"test/domain/model"
 )
 
 type StudyInfoRepository interface {
-	GetLast(id int) (*studyInfo model.StudyInfo, err error) 
-	GetAll(userId int) (*studyInfos []model.StudyInfo, err error)
-	Create(*studyInfo model.StudyInfo) (err error)
+	GetLast(userId int) (*model.StudyInfo, error)
+	GetAll(userId int) ([]*model.StudyInfo, error)
+	Create(studyInfo *model.StudyInfo) (*model.StudyInfo, error)
+	Update(studyInfo *model.StudyInfo) (*model.StudyInfo, error)
 }
