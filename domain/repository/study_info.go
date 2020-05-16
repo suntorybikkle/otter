@@ -5,7 +5,7 @@ imoprt (
 )
 
 type StudyInfoRepository interface {
-	GetLastStudyInfo(id int) (studyInfo model.StudyInfo, err error) 
-	GetAllStudyInfo(userId int) (studyInfos []model.StudyInfo, err error)
-	Create(studyInfo model.StudyInfo) (err error)
+	GetLast(id int) (*studyInfo model.StudyInfo, err error) 
+	GetAll(userId int) (*studyInfos []model.StudyInfo, err error)
+	Create(*studyInfo model.StudyInfo) (err error)
 }
