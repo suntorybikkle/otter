@@ -50,7 +50,7 @@ func (repo *StudyInfoRepository) GetAll(userId int) (studyInfos []domain.StudyIn
 }
 
 func (repo *StudyInfoRepository) GetLast(userId int) (studyInfo domain.StudyInfo, err error) {
-	row, err := repo.SqlHandler.Query("SELECT id, subject_id, study_time, date_time FROM study_infos WHERE user_id = $1 ORDER BY Id DESC LIMIT 1", id)
+	row, err := repo.SqlHandler.Query("SELECT id, subject_id, study_time, date_time FROM study_infos WHERE user_id = $1 ORDER BY Id DESC LIMIT 1", userId)
 	defer row.Close()
 	if err != nil {
 		return

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"otter/pkg/domain"
-	"otter/pkg/usecases/repository"
 )
 
 type StudyInfoRepository interface {

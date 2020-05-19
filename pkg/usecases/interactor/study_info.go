@@ -1,7 +1,6 @@
 package interactor
 
 import (
-	"log"
 	"otter/pkg/domain"
 	"otter/pkg/usecases/repository"
 	"time"
@@ -25,7 +24,7 @@ type StudyInfoInteractor struct {
 }
 
 func (interactor *StudyInfoInteractor) AddStudyInfo(studyInfo domain.StudyInfo) (err error) {
-	err = interactor.StudyInfoRepository.Create(studyInfo)
+	err = interactor.StudyInfoRepository.Create(&studyInfo)
 	return
 }
 
@@ -40,5 +39,5 @@ func (interactor *StudyInfoInteractor) GetStudyReport(userId int) (studyReport S
 			DateTime:  domainStudyInfo.DateTime,
 		})
 	}
-	return StudyReport{UserId: userId, UserName: "ktguy", StudyInfos: studyInfo}
+	return StudyReport{UserId: userId, UserName: "ktguy", StudyInfos: studyInfos}, err
 }
