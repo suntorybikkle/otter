@@ -6,8 +6,8 @@ import (
 )
 
 type StudyInfoRepository interface {
-	GetLast(userId int) (*domain.StudyInfo, error)
-	GetAll(userId int) ([]*domain.StudyInfo, error)
-	Create(studyInfo *domain.StudyInfo) (*domain.StudyInfo, error)
-	Update(studyInfo *domain.StudyInfo) (*domain.StudyInfo, error)
+	Create(*domain.StudyInfo) error
+	GetAll(int) ([]domain.StudyInfo, error)
+	GetLast(int) (domain.StudyInfo, error)
+	Update(domain.StudyInfo) error
 }

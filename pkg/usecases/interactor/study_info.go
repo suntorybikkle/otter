@@ -24,13 +24,13 @@ type StudyInfoInteractor struct {
 	StudyInfoRepository repository.StudyInfoRepository
 }
 
-func (studyInfoInteractor *StudyInfoInteractor) AddStudyInfo(studyInfo domain.StudyInfo) (err error) {
-	_, err = studyInfoInteractor.StudyInfoRepository.Create(studyInfo)
+func (interactor *StudyInfoInteractor) AddStudyInfo(studyInfo domain.StudyInfo) (err error) {
+	err = interactor.StudyInfoRepository.Create(studyInfo)
 	return
 }
 
-func (studyInfoInteractor *StudyInfoInteractor) GetStudyReport(userId int) (studyReport StudyReport, err error) {
-	domainStudyInfos, err := studyInfoInteractor.StudyInfoRepository.GetAll(userId)
+func (interactor *StudyInfoInteractor) GetStudyReport(userId int) (studyReport StudyReport, err error) {
+	domainStudyInfos, err := interactor.StudyInfoRepository.GetAll(userId)
 	var studyInfos []StudyInfo
 	for _, domainStudyInfo := range domainStudyInfos {
 		studyInfos = append(studyInfos, StudyInfo{
