@@ -9,17 +9,23 @@ type StudyInfoRepository struct {
 	SqlHandler
 }
 
+func NewStudyInfoRepository(sqlHandler SqlHandler) *StudyInfoRepository {
+	return &StudyInfoRepository{
+		SqlHandler: sqlHandler,
+	}
+}
+
 func (repo *StudyInfoRepository) Create(studyInfo *domain.StudyInfo) (err error) {
-	result, err := repo.SqlHandler.Execute("INSERT INTO study_infos(user_id, subject_id, study_time, date_time) VALUES($1, $2, $3, $4) RETURNING id",
+	_, err = repo.SqlHandler.Execute("INSERT INTO study_infos(user_id, subject_id, study_time, date_time) VALUES($1, $2, $3, $4) RETURNING id",
 		studyInfo.UserId, studyInfo.SubjectId, studyInfo.StudyTime, studyInfo.DateTime)
-	if err != nil {
-		return
-	}
-	id64, err := result.LastInsertId()
-	if err != nil {
-		return
-	}
-	studyInfo.Id = int(id64)
+	// if err != nil {
+	// 	return
+	// }
+	// id64, err := result.LastInsertId() # TODO: postgresqlではサポートされていない ドライバの差を吸収できていない
+	// err != nil {
+	// 	return
+	// }
+	// studyInfo.Id = int(id64)
 	return
 }
 

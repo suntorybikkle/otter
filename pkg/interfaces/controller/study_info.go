@@ -31,6 +31,12 @@ type StudyInfoController struct {
 	StudyInfoInteractor interactor.StudyInfoInteractor
 }
 
+func NewStudyInfoController(studyInfoInteractor interactor.StudyInfoInteractor) StudyInfoController {
+	return StudyInfoController{
+		StudyInfoInteractor: studyInfoInteractor,
+	}
+}
+
 func (controller *StudyInfoController) PostStudy(studyPostJson StudyPostJson) (err error) {
 	studyDate, err := time.Parse("2006-01-02 15:04:05", studyPostJson.DateTime)
 	if err != nil {

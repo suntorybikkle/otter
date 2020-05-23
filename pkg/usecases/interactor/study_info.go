@@ -23,6 +23,12 @@ type StudyInfoInteractor struct {
 	StudyInfoRepository repository.StudyInfoRepository
 }
 
+func NewStudyInfoInteractor(repo repository.StudyInfoRepository) StudyInfoInteractor {
+	return StudyInfoInteractor{
+		StudyInfoRepository: repo,
+	}
+}
+
 func (interactor *StudyInfoInteractor) AddStudyInfo(studyInfo domain.StudyInfo) (err error) {
 	err = interactor.StudyInfoRepository.Create(&studyInfo)
 	return
