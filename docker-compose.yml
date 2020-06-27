@@ -1,0 +1,45 @@
+# docker-compose のバージョン
+version: '3'
+
+# 各コンテナの情報
+services:
+
+  # postgres サービス
+  postgres:
+    # コンテナの名前
+    container_name: postgres
+    # Dockerfile のディレクトリパス
+    build:
+      context: .
+      dockerfile: ./build/postgresql/Dockerfile
+    ports:
+      - 5432:5432
+    # postgres 設定
+    environment:
+      - POSTGRES_USER=ldb
+      - POSTGRES_PASSWORD=ldb
+      - POSTGRES_DB=ldb
+
+  # golang アプリケーション
+  app:
+    container_name: app
+    # postgres をビルドした後に app をビルド
+    depends_on:
+      - postgres
+    # Dockerfile を指定
+    build:
+      context: .
+      dockerfile: ./build/golang/Dockerfile
+    ports:
+      - 8080:8080
+    links:
+      - postgres
+    # GOPATHを指定
+    environment:
+      - GOPATH=/go
+    # フォルダ共有（ホストOS:コンテナ）
+    volumes:
+      - .:/go/src/otter/
+    # docker-compose run 実行時に実行されるコマンド
+    # command: go run main.go
+    command: ./otter
